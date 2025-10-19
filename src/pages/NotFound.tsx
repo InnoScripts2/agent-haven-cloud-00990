@@ -22,16 +22,15 @@ const NotFound = () => {
         </div>
         <h1 className="text-6xl font-bold text-agent-dark mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-6">
-          Oops! This page doesn't exist or has been moved.
+          Упс! Эта страница не существует или была перемещена.
         </p>
         <p className="text-gray-500 mb-8">
-          The page you are looking for might have been removed, had its name changed,
-          or is temporarily unavailable.
+          Страница, которую вы ищете, могла быть удалена, переименована или временно недоступна.
         </p>
         <Button asChild className="bg-agent-primary hover:bg-agent-primary/90">
           <Link to="/agents" className="inline-flex items-center space-x-2">
             <Home className="h-4 w-4" />
-            <span>Return to Dashboard</span>
+            <span>Вернуться на главную</span>
           </Link>
         </Button>
       </div>
