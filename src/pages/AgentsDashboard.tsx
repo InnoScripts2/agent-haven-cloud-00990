@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Bot, Search, CircleSlash, Loader2, UserCircle2, MoreVertical, Power, Edit, Eye, Archive, AlertCircle, Calendar, Phone, Mail, Copy, Sparkles, PlusCircle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,15 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -40,7 +40,7 @@ import { AgentStats } from "@/components/AgentStats";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/hooks/useTheme";
 
-const randomNames = ["Aria", "Mike", "Yuki", "Misty", "Nova", "Zephyr", "Echo", "Luna", "Orion", "Iris"];
+const randomNames = ["Арина", "Михаил", "Юки", "Мила", "Нова", "Зефир", "Эхо", "Луна", "Орион", "Ирис"];
 
 const getRandomName = (id: string) => {
   const lastChar = id.charAt(id.length - 1);
@@ -55,32 +55,60 @@ const getAgentAVMScore = (id: string): number => {
   return parseFloat((baseScore + decimalPart).toFixed(2));
 };
 
+const agentTypeLabels: Record<string, string> = {
+  "Customer Service": "Поддержка клиентов",
+  "Sales & Marketing": "Продажи и маркетинг",
+  "Technical Support": "Техническая поддержка",
+  "IT Helpdesk": "IT‑служба помощи",
+  "Lead Generation": "Лидогенерация",
+  "Appointment Booking": "Назначение встреч",
+  "FAQ & Knowledge Base": "База знаний",
+  "Customer Onboarding": "Онбординг клиентов",
+  "Billing & Payments": "Биллинг и платежи",
+  "Feedback Collection": "Сбор обратной связи",
+  "Other Function": "Другое"
+};
+
+const channelLabels: Record<string, string> = {
+  voice: "Голос",
+  chat: "Чат",
+  email: "Email",
+  whatsapp: "WhatsApp",
+  sms: "SMS"
+};
+
+const statusLabels: Record<AgentStatus, string> = {
+  active: "активен",
+  inactive: "неактивен",
+  draft: "черновик"
+};
+
 const AgentsDashboard = () => {
   const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const filter = searchParams.get("filter") || "all-agents";
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [agentToDeactivate, setAgentToDeactivate] = useState<string | null>(null);
   const [skipConfirmation, setSkipConfirmation] = useState(() => {
     const saved = localStorage.getItem("skipAgentDeactivationConfirmation");
     return saved === "true";
   });
-  
+
   const { agents: initialAgents, isLoading, error } = useAgents(filter);
   const [agents, setAgents] = useState<AgentType[]>([]);
   const [filteredAgents, setFilteredAgents] = useState<AgentType[]>([]);
-  
+
   const newlyCreatedAgent: AgentType = {
     id: "new123",
-    name: "New Agent",
-    description: "This agent was just created and needs configuration to be fully operational.",
-    purpose: "Help users with customer inquiries and provide assistance with common questions.",
+    name: "Новый агент",
+    description: "Этот агент только что создан и требует настройки, чтобы полноценно работать.",
+    purpose: "Помогать пользователям с обращениями и отвечать на типовые вопросы.",
     status: "inactive",
     type: "Customer Service",
-    createdAt: "Just now",
+    createdAt: "Прямо сейчас",
     interactions: 0,
     channelConfigs: {
       "web": { enabled: false },
@@ -88,7 +116,7 @@ const AgentsDashboard = () => {
       "voice": { enabled: false }
     }
   };
-  
+
   const [sortBy, setSortBy] = useState<string>("recent");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterChannel, setFilterChannel] = useState<string>("all");
@@ -97,7 +125,7 @@ const AgentsDashboard = () => {
   useEffect(() => {
     if (initialAgents) {
       let sorted = [newlyCreatedAgent, ...initialAgents];
-      
+
       sorted = [...sorted].sort((a, b) => {
         switch (sortBy) {
           case "oldest":
@@ -119,7 +147,7 @@ const AgentsDashboard = () => {
 
         const typeMatches = filterType === "all" || agent.type === filterType;
         const statusMatches = filterStatus === "all" || agent.status === filterStatus;
-        const channelMatches = filterChannel === "all" || 
+        const channelMatches = filterChannel === "all" ||
           (agent.channels && agent.channels.includes(filterChannel)) ||
           (agent.channelConfigs && agent.channelConfigs[filterChannel]?.enabled);
 
@@ -133,55 +161,56 @@ const AgentsDashboard = () => {
   const getFilterTitle = () => {
     switch (filter) {
       case "my-agents":
-        return "Your Personal Agents";
+        return "Ваши личные агенты";
       case "team-agents":
-        return "Your Team's Agents";
+        return "Агенты вашей команды";
       default:
-        return "Your AI Agents";
+        return "Ваши ИИ-агенты";
     }
   };
 
   const executeToggleStatus = (agentId: string, currentStatus: AgentStatus) => {
     const newStatus: AgentStatus = currentStatus === "active" ? "inactive" : "active";
-    
-    setAgents(prevAgents => 
-      prevAgents.map(agent => 
+    const statusText = statusLabels[newStatus] ?? newStatus;
+
+    setAgents(prevAgents =>
+      prevAgents.map(agent =>
         agent.id === agentId ? { ...agent, status: newStatus } : agent
       )
     );
-    
-    setFilteredAgents(prevAgents => 
-      prevAgents.map(agent => 
+
+    setFilteredAgents(prevAgents =>
+      prevAgents.map(agent =>
         agent.id === agentId ? { ...agent, status: newStatus } : agent
       )
     );
-    
+
     toast({
-      title: `Agent ${newStatus === "active" ? "Activated" : "Deactivated"}`,
-      description: `The agent is now ${newStatus}.`,
+      title: `Агент ${newStatus === "active" ? "активирован" : "деактивирован"}`,
+      description: `Теперь статус агента: ${statusText}.`,
     });
-    
-    console.log(`Toggling agent ${agentId} to ${newStatus}`);
+
+    console.log(`Изменение статуса агента ${agentId} на ${newStatus}`);
   };
 
-  const handleToggleStatus = (e: React.MouseEvent, agentId: string, currentStatus: AgentStatus) => {
+  const handleToggleStatus = (e: MouseEvent, agentId: string, currentStatus: AgentStatus) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (currentStatus === "inactive" || skipConfirmation) {
       executeToggleStatus(agentId, currentStatus);
       return;
     }
-    
+
     setAgentToDeactivate(agentId);
     setConfirmDialogOpen(true);
   };
-  
+
   const handleSkipConfirmationChange = (checked: boolean) => {
     setSkipConfirmation(checked);
     localStorage.setItem("skipAgentDeactivationConfirmation", checked.toString());
   };
-  
+
   const handleConfirmDeactivation = () => {
     if (agentToDeactivate) {
       const agent = agents.find(a => a.id === agentToDeactivate);
@@ -189,7 +218,7 @@ const AgentsDashboard = () => {
         executeToggleStatus(agentToDeactivate, agent.status);
       }
     }
-    
+
     setConfirmDialogOpen(false);
     setAgentToDeactivate(null);
   };
@@ -199,10 +228,10 @@ const AgentsDashboard = () => {
     setAgentToDeactivate(null);
   };
 
-  const handleEditAgent = (e: React.MouseEvent, agentId: string) => {
+  const handleEditAgent = (e: MouseEvent, agentId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (agentId === "new123") {
       navigate(`/agents/${agentId}?tab=setup`);
     } else {
@@ -210,22 +239,22 @@ const AgentsDashboard = () => {
     }
   };
 
-  const handleArchiveAgent = (e: React.MouseEvent, agentId: string) => {
+  const handleArchiveAgent = (e: MouseEvent, agentId: string) => {
     e.preventDefault();
     e.stopPropagation();
     toast({
-      title: "Archive Agent",
-      description: "The agent has been archived.",
+      title: "Архивация агента",
+      description: "Агент перемещён в архив.",
       variant: "destructive",
     });
     setAgents(prevAgents => prevAgents.filter(agent => agent.id !== agentId));
     setFilteredAgents(prevAgents => prevAgents.filter(agent => agent.id !== agentId));
   };
 
-  const handleViewDetails = (e: React.MouseEvent, agentId: string) => {
+  const handleViewDetails = (e: MouseEvent, agentId: string) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (agentId === "new123") {
       navigate(`/agents/${agentId}?tab=setup`);
     } else {
@@ -236,36 +265,36 @@ const AgentsDashboard = () => {
   const handleCopyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
     toast({
-      title: `${type} Copied`,
-      description: `The ${type.toLowerCase()} has been copied to clipboard.`,
+      title: `${type} скопирован`,
+      description: `${type.toLowerCase()} скопирован в буфер обмена.`,
     });
   };
 
   const handlePhoneCall = (phone: string) => {
     window.location.href = `tel:${phone.replace(/[^\d+]/g, '')}`;
     toast({
-      title: "Calling Agent",
-      description: `Initiating call to ${phone}`,
+      title: "Звонок агенту",
+      description: `Начинаем звонок по номеру ${phone}`,
     });
   };
 
   const formatCreatedAt = (dateStr: string): string => {
-    if (dateStr === "Just now") return dateStr;
-    
+    if (dateStr === "Just now" || dateStr === "Прямо сейчас") return "Прямо сейчас";
+
     try {
       const date = new Date(dateStr);
       const now = new Date();
       const diffTime = Math.abs(now.getTime() - date.getTime());
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
+
       if (diffDays === 0) {
-        return "Today";
+        return "Сегодня";
       } else if (diffDays === 1) {
-        return "Yesterday";
+        return "Вчера";
       } else if (diffDays < 7) {
-        return `${diffDays} days ago`;
+        return `${diffDays} дн. назад`;
       } else if (diffDays < 30) {
-        return `${Math.floor(diffDays / 7)} weeks ago`;
+        return `${Math.floor(diffDays / 7)} нед. назад`;
       } else {
         return date.toLocaleDateString();
       }
@@ -278,8 +307,8 @@ const AgentsDashboard = () => {
     return (
       <div className="flex flex-col items-center justify-center h-[80vh] space-y-4">
         <CircleSlash className="h-16 w-16 text-agent-error opacity-80" />
-        <h2 className="text-2xl font-semibold text-foreground dark:text-white">Error Loading Agents</h2>
-        <p className="text-muted-foreground dark:text-gray-300">Please try again later.</p>
+        <h2 className="text-2xl font-semibold text-foreground dark:text-white">Ошибка загрузки агентов</h2>
+        <p className="text-muted-foreground dark:text-gray-300">Попробуйте обновить страницу позже.</p>
       </div>
     );
   }
@@ -291,10 +320,10 @@ const AgentsDashboard = () => {
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-500" />
-              Deactivate Agent?
+              Отключить агента?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to deactivate this agent? It will no longer respond to user queries.
+              Вы уверены, что хотите отключить этого агента? Он перестанет отвечать на запросы пользователей.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex items-center space-x-2 py-3">
@@ -307,13 +336,13 @@ const AgentsDashboard = () => {
               htmlFor="skipConfirmation"
               className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              Don't ask me again
+              Больше не спрашивать
             </label>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDeactivation}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelDeactivation}>Отмена</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmDeactivation} className="bg-agent-primary">
-              Deactivate
+              Отключить
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -325,19 +354,19 @@ const AgentsDashboard = () => {
             {getFilterTitle()}
           </h1>
           <p className="text-fgMuted mt-1">
-            Create, customize, and manage your intelligent assistants all in one place
+            Создавайте, настраивайте и управляйте интеллектуальными ассистентами в одном месте
           </p>
         </div>
         <ThemeToggle />
       </div>
-      
+
       <Separator />
-      
+
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-fgMuted" />
           <Input
-            placeholder="Search by name or purpose..."
+            placeholder="Поиск по имени или назначению..."
             className="pl-10 w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -347,32 +376,32 @@ const AgentsDashboard = () => {
         <div className="flex flex-wrap gap-2 items-center">
           <Select value={filterType} onValueChange={setFilterType}>
             <SelectTrigger className="w-[180px] bg-bg border-border">
-              <SelectValue placeholder="Bot Function" />
+              <SelectValue placeholder="Функция бота" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Functions</SelectItem>
-              <SelectItem value="Customer Service">Customer Service</SelectItem>
-              <SelectItem value="Sales & Marketing">Sales & Marketing</SelectItem>
-              <SelectItem value="Technical Support">Technical Support</SelectItem>
-              <SelectItem value="IT Helpdesk">IT Helpdesk</SelectItem>
-              <SelectItem value="Lead Generation">Lead Generation</SelectItem>
-              <SelectItem value="Appointment Booking">Appointment Booking</SelectItem>
-              <SelectItem value="FAQ & Knowledge Base">FAQ & Knowledge Base</SelectItem>
-              <SelectItem value="Customer Onboarding">Customer Onboarding</SelectItem>
-              <SelectItem value="Billing & Payments">Billing & Payments</SelectItem>
-              <SelectItem value="Feedback Collection">Feedback Collection</SelectItem>
-              <SelectItem value="Other Function">Other Function</SelectItem>
+              <SelectItem value="all">Все функции</SelectItem>
+              <SelectItem value="Customer Service">Поддержка клиентов</SelectItem>
+              <SelectItem value="Sales & Marketing">Продажи и маркетинг</SelectItem>
+              <SelectItem value="Technical Support">Техническая поддержка</SelectItem>
+              <SelectItem value="IT Helpdesk">IT‑служба помощи</SelectItem>
+              <SelectItem value="Lead Generation">Лидогенерация</SelectItem>
+              <SelectItem value="Appointment Booking">Назначение встреч</SelectItem>
+              <SelectItem value="FAQ & Knowledge Base">База знаний</SelectItem>
+              <SelectItem value="Customer Onboarding">Онбординг клиентов</SelectItem>
+              <SelectItem value="Billing & Payments">Биллинг и платежи</SelectItem>
+              <SelectItem value="Feedback Collection">Сбор обратной связи</SelectItem>
+              <SelectItem value="Other Function">Другое</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={filterChannel} onValueChange={setFilterChannel}>
             <SelectTrigger className="w-[140px] bg-bg border-border">
-              <SelectValue placeholder="Channel" />
+              <SelectValue placeholder="Канал" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Channels</SelectItem>
-              <SelectItem value="voice">Voice</SelectItem>
-              <SelectItem value="chat">Chat</SelectItem>
+              <SelectItem value="all">Все каналы</SelectItem>
+              <SelectItem value="voice">Голос</SelectItem>
+              <SelectItem value="chat">Чат</SelectItem>
               <SelectItem value="email">Email</SelectItem>
               <SelectItem value="whatsapp">WhatsApp</SelectItem>
               <SelectItem value="sms">SMS</SelectItem>
@@ -381,24 +410,24 @@ const AgentsDashboard = () => {
 
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-[140px] bg-bg border-border">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder="Статус" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="active">Active</SelectItem>
-              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="all">Все статусы</SelectItem>
+              <SelectItem value="active">Активные</SelectItem>
+              <SelectItem value="inactive">Неактивные</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-[140px] bg-bg border-border">
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder="Сортировка" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="oldest">Oldest First</SelectItem>
-              <SelectItem value="most-used">Most Used</SelectItem>
-              <SelectItem value="less-used">Less Used</SelectItem>
+              <SelectItem value="recent">Самые новые</SelectItem>
+              <SelectItem value="oldest">Самые старые</SelectItem>
+              <SelectItem value="most-used">Самые популярные</SelectItem>
+              <SelectItem value="less-used">Используются реже</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -411,13 +440,13 @@ const AgentsDashboard = () => {
       ) : filteredAgents.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 space-y-4">
           <Bot className="h-16 w-16 text-fgMuted opacity-80" />
-          <h2 className="text-2xl font-semibold text-fg">No Agents Found</h2>
+          <h2 className="text-2xl font-semibold text-fg">Агенты не найдены</h2>
           <p className="text-fgMuted">
-            {searchTerm ? "Try a different search term" : "Create your first agent to get started"}
+            {searchTerm ? "Попробуйте изменить запрос" : "Создайте первого агента, чтобы начать работу"}
           </p>
           {!searchTerm && (
             <Link to="/agents/create" className="brand-button mt-2">
-              Create Your First Agent
+              Создать первого агента
             </Link>
           )}
         </div>
@@ -429,14 +458,14 @@ const AgentsDashboard = () => {
                 <div className="h-12 w-12 rounded-full bg-agent-primary/10 flex items-center justify-center mb-4">
                   <PlusCircle className="h-6 w-6 text-agent-primary" />
                 </div>
-                <h3 className="text-lg font-medium text-foreground dark:text-white">Create New Agent</h3>
+                <h3 className="text-lg font-medium text-foreground dark:text-white">Создать нового агента</h3>
                 <p className="text-sm text-muted-foreground dark:text-gray-400 text-center mt-2 max-w-xs">
-                  Create a custom AI agent to help with customer support, sales, or other tasks
+                  Настройте собственного ИИ-агента для поддержки клиентов, продаж и других задач
                 </p>
               </div>
             </Card>
           </Link>
-        
+
           {filteredAgents.slice(1).map((agent) => (
             <Link to={`/agents/${agent.id}`} key={agent.id} className="block">
               <Card className="h-full card-hover">
@@ -461,94 +490,94 @@ const AgentsDashboard = () => {
                       <DropdownMenuContent align="end" className="w-48 bg-white dark:bg-gray-900 z-50">
                         <DropdownMenuItem onClick={(e) => handleToggleStatus(e, agent.id, agent.status)}>
                           <Power className="mr-2 h-4 w-4" />
-                          {agent.status === "active" ? "Deactivate" : "Activate"}
+                          {agent.status === "active" ? "Отключить" : "Включить"}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => handleEditAgent(e, agent.id)}>
                           <Edit className="mr-2 h-4 w-4" />
-                          Edit Agent
+                          Редактировать агента
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => handleViewDetails(e, agent.id)}>
                           <Eye className="mr-2 h-4 w-4" />
-                          View Details
+                          Открыть профиль
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={(e) => handleArchiveAgent(e, agent.id)}>
                           <Archive className="mr-2 h-4 w-4" />
-                          Archive Agent
+                          Архивировать агента
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
-                  
+
                   <div className="mt-3">
                     <CardDescription className="line-clamp-2 text-muted-foreground dark:text-gray-300 mb-2">
                       {agent.description}
                     </CardDescription>
-                    
+
                     {agent.channelConfigs ? (
                       <AgentChannels channels={agent.channelConfigs} readonly={true} compact={true} className="mt-0" />
                     ) : agent.channels && agent.channels.length > 0 ? (
-                      <AgentChannels 
+                      <AgentChannels
                         channels={agent.channels.reduce((obj, channel) => {
                           obj[channel] = { enabled: true };
                           return obj;
-                        }, {} as Record<string, AgentChannelConfig>)} 
-                        readonly={true} 
+                        }, {} as Record<string, AgentChannelConfig>)}
+                        readonly={true}
                         compact={true}
                         className="mt-0"
                       />
                     ) : null}
                   </div>
                 </CardHeader>
-                
+
                 <CardContent>
                   <div className="flex flex-col space-y-4">
-                    <AgentStats 
-                      avmScore={getAgentAVMScore(agent.id)} 
+                    <AgentStats
+                      avmScore={getAgentAVMScore(agent.id)}
                       interactionCount={agent.interactions}
                       compact={true}
                       hideInteractions={true}
                     />
-                    
+
                     <div className="flex flex-wrap gap-2 mt-2">
                       {filterType !== "all" && (
                         <Badge variant="muted" className="w-fit">
-                          Type: {agent.type}
+                          Тип: {agentTypeLabels[agent.type] ?? agent.type}
                         </Badge>
                       )}
-                      
+
                       {filterChannel !== "all" && agent.channels && (
                         <Badge variant="muted" className="w-fit">
-                          Channel: {filterChannel}
+                          Канал: {channelLabels[filterChannel] ?? filterChannel}
                         </Badge>
                       )}
-                      
+
                       {filterStatus !== "all" && (
                         <Badge variant="muted" className="w-fit">
-                          Status: {agent.status}
+                          Статус: {statusLabels[agent.status] ?? agent.status}
                         </Badge>
                       )}
-                      
+
                       {(sortBy === "recent" || sortBy === "oldest") && (
                         <Badge variant="muted" className="w-fit">
                           {formatCreatedAt(agent.createdAt)}
                         </Badge>
                       )}
-                      
+
                       {(sortBy === "most-used" || sortBy === "less-used") && (
                         <Badge variant="muted" className="w-fit">
-                          {agent.interactions} interactions
+                          {agent.interactions} взаимодействий
                         </Badge>
                       )}
                     </div>
                   </div>
                 </CardContent>
-                
+
                 <CardFooter className="border-t pt-4 flex justify-between items-center">
-                  <AgentToggle 
-                    isActive={agent.status === "active"} 
-                    onToggle={(e) => handleToggleStatus(e, agent.id, agent.status)} 
+                  <AgentToggle
+                    isActive={agent.status === "active"}
+                    onToggle={(e) => handleToggleStatus(e, agent.id, agent.status)}
                   />
-                  <div className="text-sm text-foreground dark:text-white font-medium">View Details &rarr;</div>
+                  <div className="text-sm text-foreground dark:text-white font-medium">Перейти к карточке &rarr;</div>
                 </CardFooter>
               </Card>
             </Link>

@@ -29,7 +29,7 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
     workflow: false,
     simulation: false
   });
-  
+
   // Track training records
   const [trainingRecords, setTrainingRecords] = useState<any[]>([]);
 
@@ -47,7 +47,7 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
   const handleStepComplete = (stepName: keyof typeof steps) => {
     setSteps(prevSteps => {
       const newSteps = { ...prevSteps };
-      
+
       // Mark current step as completed
       newSteps[stepName].status = 'completed' as StepStatus;
       newSteps[stepName].active = false;
@@ -60,7 +60,7 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
       if (nextStep) {
         newSteps[nextStep].status = 'in-progress' as StepStatus;
         newSteps[nextStep].active = true;
-        
+
         // Auto-collapse completed step and expand next step
         setExpanded(prev => ({
           ...prev,
@@ -86,34 +86,34 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
   const sampleTrainingRecords = [
     {
       id: '1',
-      title: 'Customer Support Call #1',
-      date: 'Feb 20, 2024',
-      time: '8:30 AM',
+      title: 'Звонок службы поддержки №1',
+      date: '20 фев 2024',
+      time: '08:30',
       duration: '5:30',
       type: 'call' as const
     },
     {
       id: '2',
-      title: 'Role-Play Session #1',
-      date: 'Feb 21, 2024',
-      time: '3:15 PM',
+      title: 'Сессия ролевой игры №1',
+      date: '21 фев 2024',
+      time: '15:15',
       duration: '3:45',
       type: 'roleplay' as const
     }
   ];
 
   const sampleScenarios = [
-    { id: "1", name: "Product Information Requests", completed: true },
-    { id: "2", name: "Account Management", completed: true },
-    { id: "3", name: "Billing Questions", completed: true },
-    { id: "4", name: "Service Status Updates", completed: true }
+    { id: "1", name: "Запросы о товарах", completed: true },
+    { id: "2", name: "Управление аккаунтом", completed: true },
+    { id: "3", name: "Вопросы по биллингу", completed: true },
+    { id: "4", name: "Обновления статуса сервиса", completed: true }
   ];
 
   const sampleSimulations = [
     {
       id: "1",
-      name: "Basic Customer Inquiries",
-      date: "Feb 25, 2024",
+      name: "Базовые клиентские обращения",
+      date: "25 фев 2024",
       coverage: 52,
       performance: 68,
       scenarios: 4,
@@ -121,15 +121,15 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
     },
     {
       id: "2",
-      name: "Technical Support Basics",
-      date: "Feb 24, 2024",
+      name: "Основы техподдержки",
+      date: "24 фев 2024",
       coverage: 48,
       performance: 65,
       scenarios: 3,
       tokens: "18.6k"
     }
   ];
-  
+
   // Combine default training records with any new ones
   const combinedTrainingRecords = [...sampleTrainingRecords, ...trainingRecords];
 
@@ -137,22 +137,22 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
     <div className="space-y-6 animate-fade-in">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-xl font-semibold text-fg">Agent Setup</h2>
+          <h2 className="text-xl font-semibold text-fg">Настройка агента</h2>
           <div className="flex items-center">
-            <span className="text-sm font-medium mr-2 text-fgMuted">{overallProgress}% Complete</span>
+            <span className="text-sm font-medium mr-2 text-fgMuted">Готово на {overallProgress}%</span>
             <Progress value={overallProgress} className="w-24 h-2" />
           </div>
         </div>
-        
+
         <p className="text-fgMuted">
-          Complete these steps in order to fully configure your agent for optimal performance
+          Выполните шаги, чтобы полноценно настроить агента и добиться лучшего результата
         </p>
       </div>
-      
+
       <div className="space-y-4 mt-8">
         {steps.training.status === 'not-started' && (
-          <AgentTrainingCard 
-            status="not-started" 
+          <AgentTrainingCard
+            status="not-started"
             stepNumber={1}
             isActive={steps.training.active}
             onStart={() => handleStepStart('training')}
@@ -161,9 +161,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('training')}
           />
         )}
-        
+
         {steps.training.status === 'in-progress' && (
-          <AgentTrainingCard 
+          <AgentTrainingCard
             status="in-progress"
             stepNumber={1}
             voiceSamples={3}
@@ -176,9 +176,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('training')}
           />
         )}
-        
+
         {steps.training.status === 'completed' && (
-          <AgentTrainingCard 
+          <AgentTrainingCard
             status="completed"
             stepNumber={1}
             voiceSamples={10}
@@ -191,9 +191,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('training')}
           />
         )}
-        
+
         {steps.workflow.status === 'not-started' && (
-          <WorkflowCard 
+          <WorkflowCard
             status="not-started"
             stepNumber={2}
             onStart={() => handleStepStart('workflow')}
@@ -202,9 +202,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('workflow')}
           />
         )}
-        
+
         {steps.workflow.status === 'in-progress' && (
-          <WorkflowCard 
+          <WorkflowCard
             status="in-progress"
             stepNumber={2}
             onComplete={() => handleStepComplete('workflow')}
@@ -212,18 +212,18 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('workflow')}
           />
         )}
-        
+
         {steps.workflow.status === 'completed' && (
-          <WorkflowCard 
+          <WorkflowCard
             status="completed"
             stepNumber={2}
             isExpanded={expanded.workflow}
             onToggleExpand={() => toggleExpanded('workflow')}
           />
         )}
-        
+
         {steps.simulation.status === 'not-started' && (
-          <SimulationCard 
+          <SimulationCard
             status="not-started"
             onStart={() => handleStepStart('simulation')}
             onComplete={() => handleStepComplete('simulation')}
@@ -231,9 +231,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('simulation')}
           />
         )}
-        
+
         {steps.simulation.status === 'in-progress' && (
-          <SimulationCard 
+          <SimulationCard
             status="in-progress"
             coverage={52}
             performance={68}
@@ -244,9 +244,9 @@ export const AgentSetupStepper: React.FC<AgentSetupStepperProps> = ({ agent }) =
             onToggleExpand={() => toggleExpanded('simulation')}
           />
         )}
-        
+
         {steps.simulation.status === 'completed' && (
-          <SimulationCard 
+          <SimulationCard
             status="completed"
             isExpanded={expanded.simulation}
             onToggleExpand={() => toggleExpanded('simulation')}

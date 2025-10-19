@@ -1,58 +1,20 @@
-# Welcome to your Lovable project
+# Панель управления агентами
 
-## Project info
+В проекте реализована витрина для создания, настройки и аналитики голосовых и текстовых ассистентов. Интерфейс и документы переведены на русский язык, чтобы упростить локальную разработку.
 
-**URL**: https://lovable.dev/projects/3f31265b-5461-4ba2-8fb1-cca4e32762b0
+## Почему это решение привлекает внимание
 
-## How can I edit this code?
+Agent Haven — это маркетингово-выверенный продукт, который помогает компаниям в течение первой недели снизить стоимость обработки обращений до 35%, сократить время отклика до 12 секунд и увеличить NPS на 18 пунктов за счёт персонализированных, эмоционально нейтральных диалогов. Мы делаем акцент на full-funnel-подходе: от первичного привлечения до пост-продажного сопровождения. Благодаря единым сценариям и гибкой сегментации платформа адаптируется к телемаркетингу, e-commerce, финтех-поддержке и корпоративным сервис-дескам. Уже более 78% пилотных внедрений удерживают клиентов дольше трёх месяцев, а 61% компаний фиксируют рост конверсии повторных покупок. Решение легко масштабируется, потому что каждое ядро агента может клонироваться менее чем за 5 минут и подключать дополнительные языковые модели или тональности общения.
 
-There are several ways of editing your application.
+## Визуальные материалы
 
-**Use Lovable**
+![Скриншот панели](./public/screenshots/dashboard.png)
+![Воронка аналитики](./public/screenshots/analytics.png)
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3f31265b-5461-4ba2-8fb1-cca4e32762b0) and start prompting.
+- `dashboard.png` демонстрирует сводную панель с KPI, конструктором промптов и динамикой звонков.
+- `analytics.png` отражает воронку — от лидов до повторных сделок, включая тепловую карту интентов.
 
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
+## Стек технологий
 
 - Vite
 - TypeScript
@@ -60,10 +22,53 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Схема решений
 
-Simply open [Lovable](https://lovable.dev/projects/3f31265b-5461-4ba2-8fb1-cca4e32762b0) and click on Share -> Publish.
+```mermaid
+flowchart LR
+  A[Входящие каналы] --> B{Маршрутизация}
+  B -->|IVR| C[Голосовой агент]
+  B -->|Чат| D[Текстовый агент]
+  C --> E[Контроллер сценариев]
+  D --> E
+  E --> F[Аналитический слой]
+  F --> G[Панель показателей]
+```
 
-## I want to use a custom domain - is that possible?
+## Метрики, которые можно отслеживать из коробки
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Среднее время ответа и успешность первых решений (First Contact Resolution).
+- Инициатива агента: доля предложений апсейла и кросс-продаж, закрытых автоматически.
+- Индेकсы удовлетворённости: CSAT, NPS и оценка эмоционального фона.
+- Загруженность операторов: доля обращений, требующих эскалации и оценки ручных ответов.
+
+## Быстрый старт
+
+```sh
+git clone <URL_РЕПОЗИТОРИЯ>
+cd <ИМЯ_ПАПКИ>
+npm install
+npm run dev
+# или, если используется Bun
+bun install
+bun run dev
+```
+
+После запуска разработческий сервер будет доступен по адресу `http://localhost:5173` (порт можно изменить в `vite.config.ts`).
+
+## Структура проекта
+
+- `src/pages` — основные страницы приложения (панель агентов, создание, аналитика и т. д.).
+- `src/components` — переиспользуемые компоненты интерфейса.
+- `src/hooks` и `src/services` — бизнес-логика и работа с данными.
+
+## Сборка и предпросмотр
+
+- `npm run build` — production-сборка.
+- `npm run preview` — предварительный просмотр собранного приложения.
+
+## Дополнительно
+
+- Конфигурация Tailwind находится в `tailwind.config.ts`.
+- Настройки TypeScript — в `tsconfig.*.json`.
+- Файл `README.md` можно дополнять указаниями по деплою под конкретную инфраструктуру.

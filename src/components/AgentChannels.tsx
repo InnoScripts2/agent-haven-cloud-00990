@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from "react";
-import { Mic, MessageSquare, Smartphone, Mail, MessageCircle, Search, DollarSign, Phone, Lock } from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { Mic, MessageSquare, Smartphone, Mail, MessageCircle, Search, Coins, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -48,65 +48,65 @@ interface PhoneNumberOption {
 
 const CHANNEL_INFO: Record<string, ChannelInfo> = {
   "voice": {
-    name: "Voice",
+    name: "Голос",
     icon: <Mic className="h-3.5 w-3.5" />,
     color: "text-blue-500",
     bgColor: "bg-blue-500",
-    placeholder: "+1 (800) 123-4567"
+    placeholder: "+7 (800) 123-45-67"
   },
   "chat": {
-    name: "Chat",
+    name: "Чат",
     icon: <MessageSquare className="h-3.5 w-3.5" />,
     color: "text-purple-500",
     bgColor: "bg-purple-500",
-    placeholder: "https://yourwebsite.com/chat"
+    placeholder: "https://вашсайт.ru/chat"
   },
   "sms": {
-    name: "Sms",
+    name: "SMS",
     icon: <Smartphone className="h-3.5 w-3.5" />,
     color: "text-orange-500",
     bgColor: "bg-orange-500",
-    placeholder: "+1 (800) 123-4567"
+    placeholder: "+7 (900) 123-45-67"
   },
   "email": {
     name: "Email",
     icon: <Mail className="h-3.5 w-3.5" />,
     color: "text-red-500",
     bgColor: "bg-red-500",
-    placeholder: "support@yourcompany.com"
+    placeholder: "support@company.ru"
   },
   "whatsapp": {
-    name: "Whatsapp",
+    name: "WhatsApp",
     icon: <MessageCircle className="h-3.5 w-3.5" />,
     color: "text-green-500",
     bgColor: "bg-green-500",
-    placeholder: "+1 (555) 987-6543"
+    placeholder: "+7 (999) 987-65-43"
   }
 };
 
 const SAMPLE_PHONE_NUMBERS: PhoneNumberOption[] = [
-  { number: "+1 (800) 555-0123", areaCode: "800", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (844) 555-0124", areaCode: "844", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (855) 555-0125", areaCode: "855", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (866) 555-0126", areaCode: "866", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (877) 555-0127", areaCode: "877", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (888) 555-0128", areaCode: "888", isTollFree: true, price: 5, type: "Toll-Free", available: true },
-  { number: "+1 (212) 555-0129", areaCode: "212", isTollFree: false, price: 3, type: "New York", available: true },
-  { number: "+1 (213) 555-0130", areaCode: "213", isTollFree: false, price: 3, type: "Los Angeles", available: true },
-  { number: "+1 (312) 555-0131", areaCode: "312", isTollFree: false, price: 3, type: "Chicago", available: true },
-  { number: "+1 (415) 555-0132", areaCode: "415", isTollFree: false, price: 3, type: "San Francisco", available: true },
-  { number: "+1 (305) 555-0133", areaCode: "305", isTollFree: false, price: 3, type: "Miami", available: true },
-  { number: "+1 (404) 555-0134", areaCode: "404", isTollFree: false, price: 3, type: "Atlanta", available: true },
-  { number: "+1 (512) 555-0135", areaCode: "512", isTollFree: false, price: 3, type: "Austin", available: true },
-  { number: "+1 (702) 555-0136", areaCode: "702", isTollFree: false, price: 3, type: "Las Vegas", available: true },
-  { number: "+1 (206) 555-0137", areaCode: "206", isTollFree: false, price: 3, type: "Seattle", available: true },
-  { number: "+1 (303) 555-0138", areaCode: "303", isTollFree: false, price: 3, type: "Denver", available: true },
+  { number: "+7 (800) 555-01-23", areaCode: "800", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (804) 555-01-24", areaCode: "804", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (805) 555-01-25", areaCode: "805", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (806) 555-01-26", areaCode: "806", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (807) 555-01-27", areaCode: "807", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (808) 555-01-28", areaCode: "808", isTollFree: true, price: 350, type: "Бесплатный", available: true },
+  { number: "+7 (495) 555-01-29", areaCode: "495", isTollFree: false, price: 290, type: "Москва", available: true },
+  { number: "+7 (812) 555-01-30", areaCode: "812", isTollFree: false, price: 290, type: "Санкт-Петербург", available: true },
+  { number: "+7 (343) 555-01-31", areaCode: "343", isTollFree: false, price: 280, type: "Екатеринбург", available: true },
+  { number: "+7 (861) 555-01-32", areaCode: "861", isTollFree: false, price: 280, type: "Краснодар", available: true },
+  { number: "+7 (383) 555-01-33", areaCode: "383", isTollFree: false, price: 280, type: "Новосибирск", available: true },
+  { number: "+7 (846) 555-01-34", areaCode: "846", isTollFree: false, price: 270, type: "Самара", available: true },
+  { number: "+7 (843) 555-01-35", areaCode: "843", isTollFree: false, price: 270, type: "Казань", available: true },
+  { number: "+7 (831) 555-01-36", areaCode: "831", isTollFree: false, price: 270, type: "Нижний Новгород", available: true },
+  { number: "+7 (4012) 55-01-37", areaCode: "4012", isTollFree: false, price: 260, type: "Калининград", available: true },
+  { number: "+7 (4212) 55-01-38", areaCode: "4212", isTollFree: false, price: 260, type: "Хабаровск", available: true },
 ];
 
 const ALL_CHANNELS = Object.keys(CHANNEL_INFO);
 
-export const AgentChannels: React.FC<AgentChannelsProps> = ({ 
-  channels = {}, 
+export const AgentChannels: React.FC<AgentChannelsProps> = ({
+  channels = {},
   onUpdateChannel,
   readonly = false,
   compact = false,
@@ -122,32 +122,37 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
   const [filterTollFree, setFilterTollFree] = useState<boolean | null>(null);
   const { toast } = useToast();
 
+  const selectedPhone = useMemo(() => {
+    if (!selectedPhoneNumber) return null;
+    return phoneNumbers.find((phone) => phone.number === selectedPhoneNumber) || null;
+  }, [phoneNumbers, selectedPhoneNumber]);
+
   const normalizedChannels = ALL_CHANNELS.reduce((acc, channel) => {
     acc[channel] = channels[channel] || { enabled: false };
     return acc;
   }, {} as Record<string, AgentChannelConfig>);
-  
+
   const enabledChannels = Object.entries(normalizedChannels)
     .filter(([_, config]) => config.enabled)
     .map(([channel]) => channel);
-  
+
   if (readonly || compact) {
     if (!enabledChannels.length) return null;
-    
+
     return (
       <div className={`flex flex-wrap gap-2 ${compact ? "mt-0" : "mt-1"} ${className}`}>
         {enabledChannels.map((channel) => {
           const info = CHANNEL_INFO[channel];
           const details = normalizedChannels[channel]?.details;
-          
+
           return (
-            <Badge 
+            <Badge
               key={channel}
               variant="channel"
               className="px-2 py-0.5 flex items-center gap-1"
             >
               {info.icon}
-              <span className="text-[0.6rem] capitalize">{channel}</span>
+              <span className="text-[0.6rem]">{info.name}</span>
               {showDetails && details && !hideContactInfo && (
                 <span className="text-[0.6rem] ml-1 opacity-80">{details}</span>
               )}
@@ -159,13 +164,13 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
   }
 
   const filteredPhoneNumbers = phoneNumbers.filter((phone) => {
-    const matchesQuery = searchQuery === "" || 
+    const matchesQuery = searchQuery === "" ||
       phone.number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      phone.areaCode.includes(searchQuery) || 
+      phone.areaCode.includes(searchQuery) ||
       phone.type.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesTollFree = filterTollFree === null || phone.isTollFree === filterTollFree;
-    
+
     return matchesQuery && matchesTollFree;
   });
 
@@ -179,7 +184,7 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
   const handleOpenConfigDialog = (channel: string) => {
     setActiveDialogChannel(channel);
     setChannelDetails(normalizedChannels[channel]?.details || "");
-    
+
     if (channel === 'voice') {
       setSearchQuery("");
       setFilterTollFree(null);
@@ -190,10 +195,10 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
   const handleSaveConfig = () => {
     if (activeDialogChannel && onUpdateChannel) {
       const currentConfig = normalizedChannels[activeDialogChannel] || { enabled: false };
-      const details = activeDialogChannel === 'voice' && selectedPhoneNumber 
-        ? selectedPhoneNumber 
+      const details = activeDialogChannel === 'voice' && selectedPhoneNumber
+        ? selectedPhoneNumber
         : channelDetails;
-        
+
       onUpdateChannel(activeDialogChannel, {
         ...currentConfig,
         details: details
@@ -205,8 +210,8 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
   const handlePurchasePhoneNumber = (phoneNumber: string) => {
     setSelectedPhoneNumber(phoneNumber);
     toast({
-      title: "Phone Number Selected",
-      description: `${phoneNumber} has been selected. You will be charged $5/month when you save.`,
+      title: "Номер выбран",
+      description: `${phoneNumber} будет подключён и сохранён после подтверждения изменений.`,
     });
   };
 
@@ -223,9 +228,9 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
       {ALL_CHANNELS.map((channel) => {
         const channelConfig = normalizedChannels[channel];
         const info = CHANNEL_INFO[channel];
-        
+
         return (
-          <div 
+          <div
             key={channel}
             className="bg-white/90 dark:bg-black/40 rounded-lg border border-gray-200 dark:border-gray-800 p-4 flex flex-col shadow-sm"
           >
@@ -239,33 +244,33 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                 onCheckedChange={(checked) => handleToggleChannel(channel, checked)}
               />
             </div>
-            
+
             {channelConfig.details ? (
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 truncate">{channelConfig.details}</p>
             ) : (
-              <p className="text-sm text-gray-500 mb-4 italic">No configuration</p>
+              <p className="text-sm text-gray-500 mb-4 italic">Конфигурация не задана</p>
             )}
-            
+
             <Dialog>
               <DialogTrigger asChild>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="mt-auto border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-white"
                   onClick={() => handleOpenConfigDialog(channel)}
                 >
-                  Configure
+                  Настроить
                 </Button>
               </DialogTrigger>
-              
+
               {activeDialogChannel === channel && (
                 <DialogContent className="sm:max-w-md bg-white dark:bg-black text-gray-800 dark:text-white border-gray-200 dark:border-gray-700">
                   <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                       <span className={info.color}>{info.icon}</span>
-                      Configure {info.name}
+                      Настройка канала {info.name}
                     </DialogTitle>
                   </DialogHeader>
-                  
+
                   <div className="space-y-4 py-4">
                     {channel === 'voice' ? (
                       <div className="space-y-4">
@@ -273,14 +278,14 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                           <div className="relative flex-1">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                             <Input
-                              placeholder="Search by area code, location..."
+                              placeholder="Поиск по коду региона или городу..."
                               className="pl-9 bg-white/90 dark:bg-black/30 border-gray-300 dark:border-gray-700 text-gray-800 dark:text-white"
                               value={searchQuery}
                               onChange={handleSearchChange}
                             />
                           </div>
                         </div>
-                        
+
                         <div className="flex flex-wrap gap-2">
                           <Button
                             variant={filterTollFree === null ? "secondary" : "outline"}
@@ -288,7 +293,7 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                             className="text-xs h-7"
                             onClick={() => handleToggleTollFree(null)}
                           >
-                            All
+                            Все
                           </Button>
                           <Button
                             variant={filterTollFree === true ? "secondary" : "outline"}
@@ -296,7 +301,7 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                             className="text-xs h-7"
                             onClick={() => handleToggleTollFree(true)}
                           >
-                            Toll-Free
+                            Бесплатные
                           </Button>
                           <Button
                             variant={filterTollFree === false ? "secondary" : "outline"}
@@ -304,10 +309,10 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                             className="text-xs h-7"
                             onClick={() => handleToggleTollFree(false)}
                           >
-                            Local
+                            Городские
                           </Button>
                         </div>
-                        
+
                         {selectedPhoneNumber && (
                           <div className="flex items-center justify-between p-2 bg-agent-primary/10 rounded border border-agent-primary/20">
                             <div className="flex items-center gap-2">
@@ -315,17 +320,19 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                               <span className="text-sm">{selectedPhoneNumber}</span>
                             </div>
                             <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
-                              <DollarSign className="h-3 w-3" />
-                              <span>$5/month</span>
+                              <Coins className="h-3 w-3" />
+                              <span>
+                                {selectedPhone ? `${selectedPhone.price.toLocaleString("ru-RU")} ₽/мес` : "Тариф уточняется"}
+                              </span>
                             </div>
                           </div>
                         )}
-                        
+
                         <ScrollArea className="h-[300px] pr-4 -mr-4">
                           <div className="space-y-2">
                             {filteredPhoneNumbers.length > 0 ? (
                               filteredPhoneNumbers.map((phone) => (
-                                <div 
+                                <div
                                   key={phone.number}
                                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-100 dark:hover:bg-gray-900/80 transition-colors"
                                 >
@@ -337,37 +344,36 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                                       </Badge>
                                       {phone.isTollFree && (
                                         <Badge className="text-[0.65rem] h-4 px-1.5 bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-200">
-                                          Toll-Free
+                                          Бесплатный
                                         </Badge>
                                       )}
                                     </div>
                                   </div>
-                                  
+
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                       <Button size="sm" className="bg-agent-primary hover:bg-agent-primary/90 text-white">
-                                        <DollarSign className="h-3 w-3 mr-1" />
-                                        ${phone.price}/mo
+                                        <Coins className="h-3 w-3 mr-1" />
+                                        {phone.price.toLocaleString("ru-RU")} ₽/мес
                                       </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent className="bg-white dark:bg-black border-gray-200 dark:border-gray-700 text-gray-800 dark:text-white">
                                       <AlertDialogHeader>
-                                        <AlertDialogTitle>Confirm Phone Number Purchase</AlertDialogTitle>
+                                        <AlertDialogTitle>Подтверждение выбора номера</AlertDialogTitle>
                                         <AlertDialogDescription className="text-gray-600 dark:text-gray-400">
-                                          You are about to select {phone.number} for your voice channel. 
-                                          This will cost ${phone.price}/month. You will not be charged 
-                                          until you save your changes.
+                                          Вы собираетесь подключить номер {phone.number} к голосовому каналу.
+                                          Стоимость составит {phone.price.toLocaleString("ru-RU")} ₽/мес. Оплата будет списана после сохранения изменений.
                                         </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                         <AlertDialogCancel className="bg-white dark:bg-transparent border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-white">
-                                          Cancel
+                                          Отмена
                                         </AlertDialogCancel>
-                                        <AlertDialogAction 
+                                        <AlertDialogAction
                                           className="bg-agent-primary hover:bg-agent-primary/90"
                                           onClick={() => handlePurchasePhoneNumber(phone.number)}
                                         >
-                                          Select Number
+                                          Выбрать номер
                                         </AlertDialogAction>
                                       </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -377,8 +383,8 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                             ) : (
                               <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500">
                                 <Search className="h-8 w-8 mb-2 opacity-50" />
-                                <p>No phone numbers found matching your search criteria.</p>
-                                <p className="text-sm mt-1">Try a different search term or filter.</p>
+                                <p>По заданным параметрам номера не найдены.</p>
+                                <p className="text-sm mt-1">Попробуйте изменить запрос или фильтр.</p>
                               </div>
                             )}
                           </div>
@@ -387,11 +393,11 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                     ) : (
                       <div className="space-y-2">
                         <Label htmlFor={`${channel}-details`}>
-                          {channel === 'sms' || channel === 'whatsapp' 
-                            ? 'Phone Number' 
-                            : channel === 'chat' 
-                              ? 'URL' 
-                              : 'Email Address'}
+                          {channel === 'sms' || channel === 'whatsapp'
+                            ? 'Номер телефона'
+                            : channel === 'chat'
+                              ? 'URL-адрес'
+                              : 'Электронная почта'}
                         </Label>
                         <Input
                           id={`${channel}-details`}
@@ -403,20 +409,20 @@ export const AgentChannels: React.FC<AgentChannelsProps> = ({
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       onClick={() => setActiveDialogChannel(null)}
                       className="bg-white dark:bg-transparent border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-800 dark:text-white"
                     >
-                      Cancel
+                      Отмена
                     </Button>
                     <Button
                       onClick={handleSaveConfig}
                       className="bg-agent-primary hover:bg-agent-primary/90"
                     >
-                      Save Changes
+                      Сохранить
                     </Button>
                   </div>
                 </DialogContent>

@@ -30,57 +30,57 @@ const AgentCreate = () => {
     customIndustry: "",
     customFunction: "",
   });
-  
+
   const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d\s()\-+]/g, '');
     setPhoneNumber(value);
   };
-  
+
   const validatePhoneNumber = () => {
     return phoneNumber.replace(/[^\d]/g, '').length >= 10;
   };
-  
+
   const startAgentCreationCall = () => {
     if (!validatePhoneNumber()) {
       toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid phone number.",
+        title: "Некорректный номер",
+        description: "Введите, пожалуйста, корректный номер телефона.",
         variant: "destructive",
       });
       return;
     }
-    
+
     setCallState("connecting");
-    
+
     setTimeout(() => {
       setCallState("active");
       simulateConversation();
     }, 2000);
   };
-  
+
   const simulateConversation = () => {
     const conversation = [
-      { delay: 1000, role: "system" as const, text: "Hello! I'm your AI assistant, and I'll help you create a new agent. What would you like to name your agent?" },
-      { delay: 4000, role: "user" as const, text: "Customer Support Bot" },
-      { delay: 2000, role: "system" as const, text: "Great name! What industry will this agent be working in?" },
-      { delay: 4000, role: "user" as const, text: "E-commerce" },
-      { delay: 2000, role: "system" as const, text: "E-commerce is selected. What function will this agent serve? For example, customer service, sales, or technical support?" },
-      { delay: 4000, role: "user" as const, text: "Customer service for order issues and returns" },
-      { delay: 2000, role: "system" as const, text: "I've set the function to Customer Service. Can you describe the main purpose of this agent?" },
-      { delay: 5000, role: "user" as const, text: "Help customers track orders, process returns, and resolve common shopping issues" },
-      { delay: 2000, role: "system" as const, text: "Great! Based on our conversation, I've created a prompt for your agent. You can review and edit it in the sidebar. Is there anything else you'd like to customize?" },
-      { delay: 4000, role: "user" as const, text: "No, that looks good" },
-      { delay: 2000, role: "system" as const, text: "Perfect! Your Customer Support Bot has been created successfully. You can now review all the details in the sidebar and make any final adjustments before finishing." },
+      { delay: 1000, role: "system" as const, text: "Здравствуйте! Я помогу вам создать нового агента. Как вы хотите его назвать?" },
+      { delay: 4000, role: "user" as const, text: "Бот поддержки клиентов" },
+      { delay: 2000, role: "system" as const, text: "Отличное имя! В какой отрасли будет работать агент?" },
+      { delay: 4000, role: "user" as const, text: "Электронная коммерция" },
+      { delay: 2000, role: "system" as const, text: "Отрасль электронной коммерции выбрана. Какую функцию будет выполнять агент — например, поддержку клиентов, продажи или техподдержку?" },
+      { delay: 4000, role: "user" as const, text: "Поддержка клиентов по вопросам заказов и возвратов" },
+      { delay: 2000, role: "system" as const, text: "Функция установлена как поддержка клиентов. Опишите основную задачу агента." },
+      { delay: 5000, role: "user" as const, text: "Помогать отслеживать заказы, оформлять возвраты и решать типичные проблемы покупателей" },
+      { delay: 2000, role: "system" as const, text: "Отлично! На основе разговора я подготовил промпт для агента. Вы можете просмотреть и отредактировать его в боковой панели. Хотите что-то дополнительно настроить?" },
+      { delay: 4000, role: "user" as const, text: "Нет, всё подходит" },
+      { delay: 2000, role: "system" as const, text: "Готово! Бот поддержки клиентов успешно создан. Проверьте детали в боковой панели и внесите финальные изменения при необходимости." },
     ];
-    
+
     let cumulativeDelay = 0;
-    
+
     conversation.forEach((item, index) => {
       cumulativeDelay += item.delay;
-      
+
       setTimeout(() => {
         setTranscription(prev => [...prev, item]);
-        
+
         if (item.role === "user") {
           switch (index) {
             case 1: // Name response
@@ -93,8 +93,8 @@ const AgentCreate = () => {
               setAgentConfig(prev => ({ ...prev, botFunction: "customer-service" }));
               break;
             case 7: // Purpose response
-              setAgentConfig(prev => ({ 
-                ...prev, 
+              setAgentConfig(prev => ({
+                ...prev,
                 description: item.text,
                 purpose: item.text,
                 prompt: `You are a Customer Support Bot for an e-commerce platform. Your main purpose is to ${item.text.toLowerCase()}. Always be helpful, friendly, and efficient in addressing customer concerns.`
@@ -102,7 +102,7 @@ const AgentCreate = () => {
               break;
           }
         }
-        
+
         if (index === conversation.length - 1) {
           setTimeout(() => {
             setCallState("completed");
@@ -111,72 +111,72 @@ const AgentCreate = () => {
       }, cumulativeDelay);
     });
   };
-  
+
   const handleCreateAgent = () => {
     setIsSubmitting(true);
-    
+
     setTimeout(() => {
       toast({
-        title: "Agent Created!",
-        description: `${agentConfig.name} has been successfully created.`,
+        title: "Агент создан!",
+        description: `${agentConfig.name} успешно создан.`,
       });
       setIsSubmitting(false);
       navigate("/agents");
     }, 1500);
   };
-  
+
   return (
     <div className="max-w-7xl mx-auto animate-fade-in">
       <div className="mb-8">
         <Link to="/agents" className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Agents
+          Назад к агентам
         </Link>
       </div>
-      
+
       <div className="flex items-center space-x-3 mb-6">
         <div>
-          <h1 className="text-3xl font-semibold text-foreground">Create New Agent by Voice</h1>
-          <p className="text-muted-foreground mt-1">Talk with our system to configure your new agent</p>
+          <h1 className="text-3xl font-semibold text-foreground">Создание агента голосом</h1>
+          <p className="text-muted-foreground mt-1">Поговорите с системой, чтобы настроить нового агента</p>
         </div>
       </div>
-      
+
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1">
           {callState === "idle" ? (
             <Card>
               <CardHeader>
-                <CardTitle>Step 1: Start Agent Creation Call</CardTitle>
+                <CardTitle>Шаг 1. Запустите звонок для настройки</CardTitle>
                 <CardDescription>
-                  Enter your phone number to begin the guided agent creation process
+                  Введите номер телефона, чтобы начать пошаговую настройку агента
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="phone">Номер телефона</Label>
                   <div className="flex space-x-2">
                     <div className="relative flex-1">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="phone"
-                        placeholder="+1 (555) 123-4567"
+                        placeholder="+7 (900) 123-45-67"
                         value={phoneNumber}
                         onChange={handlePhoneNumberChange}
                         className="pl-10"
                       />
                     </div>
-                    <Button 
+                    <Button
                       onClick={startAgentCreationCall}
                       disabled={!phoneNumber}
                       className="gap-2"
                       variant="contrast"
                     >
                       <Mic className="h-4 w-4" />
-                      Start Call
+                      Начать звонок
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    We'll call you at this number to guide you through agent creation
+                    Мы позвоним на указанный номер и проведём вас через настройку
                   </p>
                 </div>
               </CardContent>
@@ -187,33 +187,33 @@ const AgentCreate = () => {
                 <div className="flex justify-between items-center">
                   <div>
                     <CardTitle>
-                      {callState === "connecting" && "Connecting..."}
-                      {callState === "active" && "Agent Creation Call"}
-                      {callState === "completed" && "Agent Configuration Complete"}
+                      {callState === "connecting" && "Соединяем..."}
+                      {callState === "active" && "Идёт настройка агента"}
+                      {callState === "completed" && "Настройка завершена"}
                     </CardTitle>
                     <CardDescription>
-                      {callState === "connecting" && "Please wait while we connect your call..."}
-                      {callState === "active" && "Live transcription of your conversation"}
-                      {callState === "completed" && "Your agent has been configured based on the call"}
+                      {callState === "connecting" && "Подождите, пока мы подключим звонок"}
+                      {callState === "active" && "Онлайн-транскрипция вашего разговора"}
+                      {callState === "completed" && "Агент настроен на основе вашего диалога"}
                     </CardDescription>
                   </div>
                   <div>
                     {callState === "connecting" && (
                       <div className="bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Connecting
+                        Подключение
                       </div>
                     )}
                     {callState === "active" && (
                       <div className="bg-green-500/20 text-green-600 dark:text-green-400 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                         <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></span>
-                        Active Call
+                        Звонок активен
                       </div>
                     )}
                     {callState === "completed" && (
                       <div className="bg-blue-500/20 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4" />
-                        Completed
+                        Готово
                       </div>
                     )}
                   </div>
@@ -224,8 +224,8 @@ const AgentCreate = () => {
               </CardContent>
               {callState === "completed" && (
                 <CardFooter className="flex justify-end border-t pt-6">
-                  <Button 
-                    onClick={handleCreateAgent} 
+                  <Button
+                    onClick={handleCreateAgent}
                     disabled={isSubmitting}
                     className="gap-2"
                     variant="contrast"
@@ -233,12 +233,12 @@ const AgentCreate = () => {
                     {isSubmitting ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        Creating...
+                        Создаём...
                       </>
                     ) : (
                       <>
                         <CheckCircle2 className="h-4 w-4" />
-                        Create Agent
+                        Создать агента
                       </>
                     )}
                   </Button>
@@ -247,7 +247,7 @@ const AgentCreate = () => {
             </Card>
           )}
         </div>
-        
+
         <div className="w-full md:w-[400px]">
           <AgentConfigSidebar agentConfig={agentConfig} />
         </div>
